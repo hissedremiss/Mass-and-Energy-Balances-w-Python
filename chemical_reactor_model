@@ -1,0 +1,42 @@
+import numpy as np
+from scipy.integrate import odeint
+import matplotlib.pyplot as plt
+
+# Physical parameters
+V = 1000.0  # reactor volume in liters
+F_N2 = 5.0  # nitrogen flow rate in kg/min
+F_H2 = 15.0  # hydrogen flow rate in kg/min
+DeltaH = 45e3  # heat of reaction per unit mass of reactants in J/g
+
+# Initial conditions
+N2_0 = F_N2 / V  # initial concentration of N2
+H2_0 = F_H2 / (V * 3)  # initial concentration of H2
+NH3_0 = 0.0  # initial concentration of NH3
+Q_0 = 0.0  # initial heat of reaction
+
+# Time points
+t = np.linspace(0, 60, 100)
+
+def model(y, t):
+    N2, H2, NH3, Q = y
+
+    dN2_dt = -F_N2 / V
+    dH2_dt = -3 * F_H2 / (V * 3)
+    dNH3_dt = 2 * F_N2 / (V * 3)
+    dQ_dt = -DeltaH * F_N2 / V
+
+    return [dN2_dt, dH2_dt, dNH3_dt, dQ_dt]
+
+# Solve ODEs
+y0 = [N2_0, H2_0, NH3_0, Q_0]
+sol = odeint(model, y0, t)
+
+# Plot results
+plt.plot(t, sol[:, 0], label='Nitrogen (N2)')
+plt.plot(t, sol[:, 1], label='Hydrogen (H2)')
+plt.plot(t, sol[:, 2], label='Ammonia (NH3)')
+plt.plot(t, sol[:, 3], label='Heat of reaction')
+plt.xlabel('Time (min)')
+plt.ylabel('Concentration or heat')
+plt.legend()
+plt.show()
